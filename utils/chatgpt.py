@@ -1,4 +1,4 @@
-from openai import OpenAI
+import openai
 import os
 from dotenv import load_dotenv
 from typing import List, Dict, Tuple
@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def calculate_variations(data: List[Dict], key: str) -> List[Tuple[datetime, float]]:
     """Calculate variations of a metric over time"""
@@ -109,7 +109,7 @@ IMPORTANT: Always provide at least 3 suggestions based on the data, even if they
     
     try:
         print("\n=== Debug: Sending request to ChatGPT ===")
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are an expert in automotive telemetry data analysis."},
@@ -168,4 +168,4 @@ IMPORTANT: Always provide at least 3 suggestions based on the data, even if they
                 "Verify your API key is valid",
                 "Ensure the server has internet access"
             ]
-        ) 
+        )
