@@ -127,15 +127,40 @@ IMPORTANT: Always provide at least 3 suggestions based on the data, even if they
         # Split content into lines and clean empty lines
         lines = [line.strip() for line in content.split("\n") if line.strip()]
         
-        # First non-empty line is the summary
-        summary = lines[0] if lines else "No summary available"
-        
-        # Extract suggestions (everything starting with "At" or containing a timestamp)
+        # Parse ChatGPT response into sections
+        summary = "No summary available"
         suggestions = []
-        for line in lines[1:]:
-            if line.startswith("At") or ":" in line:  # More flexible matching
-                suggestions.append(line)
+        general_advice = []
+        current_section = None
         
+        for line in lines:
+            if line.lower().startswith("1. summary"):
+                current_section = "summary"
+                continue
+            elif line.lower().startswith("2. improvement suggestions"):
+                current_section = "suggestions"
+                continue
+            elif line.lower().startswith("3. general advice"):
+                current_section = "general_advice"
+                continue
+            elif line.strip().startswith("Overall"):
+                # Sometimes ChatGPT adds a final overall comment
+                current_section = None
+                continue
+            if not line.strip():
+                continue
+            if current_section == "summary":
+                if summary == "No summary available":
+                    summary = line
+                else:
+                    summary += " " + line
+            elif current_section == "suggestions":
+                if line.strip().startswith("-") or line.strip().startswith("At") or ":" in line:
+                    suggestions.append(line.lstrip("- "))
+            elif current_section == "general_advice":
+                if line.strip().startswith("-"):
+                    general_advice.append(line.lstrip("- "))
+
         # If no suggestions found, add some default ones
         if not suggestions:
             suggestions = [
@@ -143,13 +168,17 @@ IMPORTANT: Always provide at least 3 suggestions based on the data, even if they
                 "General: Monitor engine temperature during high-speed driving",
                 "General: Try to avoid sudden acceleration and deceleration"
             ]
-        
+
+        # Optionally, add general advice to suggestions if you want to always show at least 3
+        while len(suggestions) < 3 and general_advice:
+            suggestions.append(general_advice.pop(0))
+
         print("\n=== Debug: Extracted Analysis ===")
         print(f"Summary: {summary}")
         print("Suggestions:")
         for suggestion in suggestions:
             print(f"- {suggestion}")
-        
+
         return TripAnalysis(
             trip_id=trip_data[0]['trip_id'],
             summary=summary,
