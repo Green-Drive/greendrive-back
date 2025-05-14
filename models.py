@@ -41,4 +41,5 @@ class TelemetryDataCreate(BaseModel):
 class TripAnalysis(BaseModel):
     trip_id: str
     summary: str
-    suggestions: List[str] 
+    suggestions: List[str]
+    plain_text: str = None

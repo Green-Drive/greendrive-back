@@ -158,8 +158,8 @@ IMPORTANT: Always provide at least 3 suggestions based on the data, even if they
                 if line.strip().startswith("-") or line.strip().startswith("At") or ":" in line:
                     suggestions.append(line.lstrip("- "))
             elif current_section == "general_advice":
-                if line.strip().startswith("-"):
-                    general_advice.append(line.lstrip("- "))
+                # if line.strip().startswith("-"):
+                general_advice.append(line.lstrip("- "))
 
         # If no suggestions found, add some default ones
         if not suggestions:
@@ -182,7 +182,8 @@ IMPORTANT: Always provide at least 3 suggestions based on the data, even if they
         return TripAnalysis(
             trip_id=trip_data[0]['trip_id'],
             summary=summary,
-            suggestions=suggestions
+            suggestions=suggestions,
+            plain_text=content
         )
         
     except Exception as e:
