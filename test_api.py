@@ -177,10 +177,6 @@ def test_analyze_api(trip_id: str):
 def main():
     print("=== Starting API Tests ===")
     
-    # Wait for API to be ready
-    print("Waiting for API to be ready...")
-    time.sleep(5)
-    
     # Test ingestion
     trip_id = test_ingest_api()
     

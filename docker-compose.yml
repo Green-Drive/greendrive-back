@@ -1,38 +1,36 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: timescale/timescaledb:latest-pg15
-    container_name: telemetry_db
+  db:
+    image: postgres:17-alpine
+    container_name: truewallet-postgres-dev
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-telemetry_db}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: userdb
+      TZ: Europe/Paris
     ports:
-      - "5432:5432"
+      - "5448:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: [ "CMD-SHELL", "pg_isready -U devuser -d userdb" ]
+      interval: 1s
       timeout: 5s
-      retries: 5
+      retries: 20
 
-  backend:
-    image: python:3.12-slim
-    container_name: greendrive-back
-    working_dir: /app
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-telemetry_db}
-    volumes:
-      - ./:/app
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: common_models
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "8000:8000"
-    depends_on:
-      - postgres
-    command: bash -c "pip install --no-cache-dir -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
 
 volumes:
-  postgres_data:
+  db_data:
