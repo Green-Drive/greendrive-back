@@ -24,5 +24,8 @@ class TripAnalysis(BaseModel):
     trip_id: str
     summary: str
     suggestions: List[str]
+    eco_score: int
     plain_text: str
-    general_advice: List[str] = None
+    general_advice: Optional[List[str]] = None
+    fuel_saved_liters: Optional[float] = None
+    co2_avoided_kg: Optional[float] = None

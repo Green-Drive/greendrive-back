@@ -82,7 +82,7 @@ Critical moments of the trip:
 def analyze_trip_with_chatgpt(
         trip_data: List[Dict[str, Any]],
         *,
-        model: str = "gpt-4o-mini",
+        model: str = "o4-mini-2025-04-16",
         debug: bool = False,
 ) -> TripAnalysis:
     """
@@ -97,7 +97,12 @@ def analyze_trip_with_chatgpt(
     messages: List[ChatCompletionMessageParam] = [
         ChatCompletionSystemMessageParam(
             role="system",
-            content="You are an expert in automotive telemetry data analysis.",
+            content="You are an expert in automotive telemetry data analysis. "
+                    "Analyze the trip, provide a summary, suggestions, general advice, "
+                    "and calculate an ecological score (eco_score) between 0 and 100, "
+                    "where 100 is highly ecological and 0 is not ecological at all. "
+                    "Also, estimate the fuel saved in liters (fuel_saved_liters) and CO2 emissions avoided in kilograms (co2_avoided_kg) "
+                    "compared to a less ecological driving style for the same trip. If the driving was not ecological, these values can be 0 or negative.",
         ),
         ChatCompletionUserMessageParam(
             role="user",
@@ -130,8 +135,22 @@ def analyze_trip_with_chatgpt(
                 "minItems": 1,
                 "items": {"type": "string"},
             },
+            "eco_score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Ecological score of the trip, from 0 (not ecological) to 100 (highly ecological)."
+            },
+            "fuel_saved_liters": {
+                "type": "number",
+                "description": "Estimated fuel saved in liters compared to a less ecological driving style for this trip. Can be 0 or negative if driving was not ecological."
+            },
+            "co2_avoided_kg": {
+                "type": "number",
+                "description": "Estimated CO2 emissions avoided in kilograms compared to a less ecological driving style for this trip. Can be 0 or negative if driving was not ecological."
+            }
         },
-        "required": ["summary", "suggestions", "general_advice"],
+        "required": ["summary", "suggestions", "general_advice", "eco_score", "fuel_saved_liters", "co2_avoided_kg"],
         "strict": True,
     }
 
@@ -139,7 +158,7 @@ def analyze_trip_with_chatgpt(
     functions: List[Function] = [
         Function(
             name="report_trip_analysis",
-            description="Return summary, suggestions, and general advice",
+            description="Return summary, suggestions, general advice, eco_score, fuel_saved_liters, and co2_avoided_kg",
             parameters=schema,
         )
     ]
@@ -152,8 +171,7 @@ def analyze_trip_with_chatgpt(
         model=model,
         messages=messages,
         functions=functions,
-        function_call=function_call_option, # Corrected variable name for clarity
-        temperature=0.7,
+        function_call=function_call_option,
     )
 
     msg = response.choices[0].message
@@ -190,5 +208,9 @@ def analyze_trip_with_chatgpt(
         trip_id=trip_data[0]["trip_id"],
         summary=result["summary"],
         suggestions=suggestions,
+        general_advice=result.get("general_advice"),
+        eco_score=result["eco_score"],
+        fuel_saved_liters=result.get("fuel_saved_liters"),
+        co2_avoided_kg=result.get("co2_avoided_kg"),
         plain_text=json.dumps(result, ensure_ascii=False), # Storing the parsed result
     )

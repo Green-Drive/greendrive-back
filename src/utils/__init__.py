@@ -1,1 +1,1 @@
-from .chatgpt2 import *
+from .chatgpt import *

@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
 from database import Session
 from database.tables.telemetry import TelemetryData
 from schemas.models import TripAnalysis
-from utils.chatgpt2 import analyze_trip_with_chatgpt
+from utils.chatgpt import analyze_trip_with_chatgpt
 
 
 router = APIRouter()
