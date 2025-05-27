@@ -1,14 +1,10 @@
-from sqlalchemy import Column, String, Integer, Float, DateTime, Index
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-import uuid
-
-from pydantic import BaseModel
 from typing import List, Optional
 
+from pydantic import BaseModel
 
-class TelemetryDataCreate(BaseModel):
+
+class TelemetryDataResponse(BaseModel):
     vehicle_id: str
     trip_id: str
     timestamp: datetime
@@ -29,3 +25,9 @@ class TripAnalysis(BaseModel):
     general_advice: Optional[List[str]] = None
     fuel_saved_liters: Optional[float] = None
     co2_avoided_kg: Optional[float] = None
+
+
+class ReportResponse(BaseModel):
+    vehicle_id: str
+    score: int
+    timestamp: datetime

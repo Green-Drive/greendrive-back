@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter
 
 from database import Session
-from schemas.models import TelemetryDataCreate
+from schemas.models import TelemetryDataResponse
 from . import TelemetryData
 
 
@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.post("/ingest")
 async def ingest_telemetry_data(
-        data: List[TelemetryDataCreate]
+        data: List[TelemetryDataResponse]
 ):
     async with Session() as session:
         try:

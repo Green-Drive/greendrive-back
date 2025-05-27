@@ -2,7 +2,9 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
 from database import Session
+from database.tables.reports import Report
 from database.tables.telemetry import TelemetryData
+from schemas import ReportResponse
 from schemas.models import TripAnalysis
 from utils.chatgpt import analyze_trip_with_chatgpt
 
@@ -34,4 +36,34 @@ async def analyze_trip(
             for item in trip_data
         ]
 
-        return analyze_trip_with_chatgpt(trip_data_dict)
+        report = analyze_trip_with_chatgpt(trip_data_dict)
+        if not report:
+            raise HTTPException(status_code=500, detail="Failed to analyze trip data")
+
+        db_report = Report(
+            vehicle_id=trip_data.vehicle_id,
+            score=report.eco_score,
+        )
+        session.add(db_report)
+        await session.commit()
+
+        return report
+
+
+@router.get("/reports/{vehicle_id}", response_model=list[ReportResponse])
+async def get_reports(
+        vehicle_id: str,
+):
+    async with Session() as session:
+        stmt = select(Report).where(Report.vehicle_id == vehicle_id)
+        result = await session.execute(stmt)
+        reports = result.scalars().all()
+
+        if not reports:
+            raise HTTPException(status_code=404, detail="No reports found for this vehicle")
+
+        return [ReportResponse(
+            vehicle_id=report.vehicle_id,
+            score=report.score,
+            timestamp=report.timestamp
+        ) for report in reports]

@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, String, DateTime, Integer, Float, UUID, Index
+from sqlalchemy import Column, String, DateTime, Integer, Float, UUID
 
 from database.engine import Base
 
@@ -16,9 +16,3 @@ class TelemetryData(Base):
     speed = Column(Float)
     fuel_consumption = Column(Float)
     engine_temp = Column(Float)
-    latitude = Column(Float)
-    longitude = Column(Float)
-
-    __table_args__ = (
-        Index('idx_trip_timestamp', 'trip_id', 'timestamp'),
-    )
