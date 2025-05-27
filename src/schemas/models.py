@@ -12,8 +12,6 @@ class TelemetryDataResponse(BaseModel):
     speed: Optional[float] = None
     fuel_consumption: Optional[float] = None
     engine_temp: Optional[float] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
 
 
 class TripAnalysis(BaseModel):

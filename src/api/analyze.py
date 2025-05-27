@@ -20,18 +20,19 @@ async def analyze_trip(
         stmt = select(TelemetryData).where(TelemetryData.trip_id == trip_id)
         result = await session.execute(stmt)
         trip_data = result.scalars().all()
-
+        print(trip_data[0].vehicle_id)
         if not trip_data:
             raise HTTPException(status_code=404, detail="Trip data not found")
 
         trip_data_dict = [
             {
+                "vehicle_id": item.vehicle_id,
                 "trip_id": item.trip_id,
                 "speed": item.speed,
                 "rpm": item.rpm,
                 "engine_temp": item.engine_temp,
                 "fuel_consumption": item.fuel_consumption,
-                "timestamp": item.timestamp
+                "timestamp": item.timestamp,
             }
             for item in trip_data
         ]
@@ -41,7 +42,7 @@ async def analyze_trip(
             raise HTTPException(status_code=500, detail="Failed to analyze trip data")
 
         db_report = Report(
-            vehicle_id=trip_data.vehicle_id,
+            vehicle_id=trip_data[0].vehicle_id,
             score=report.eco_score,
         )
         session.add(db_report)
