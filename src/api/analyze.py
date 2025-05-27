@@ -66,5 +66,5 @@ async def get_reports(
         return [ReportResponse(
             vehicle_id=report.vehicle_id,
             score=report.score,
-            timestamp=report.timestamp
+            timestamp=report.date
         ) for report in reports]
