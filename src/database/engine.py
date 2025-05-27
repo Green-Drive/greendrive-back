@@ -96,5 +96,7 @@ async def init_db() -> None:
     """
     global Engine, Session
     Engine, Session = _create_engine_and_session()
+
     async with Engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
