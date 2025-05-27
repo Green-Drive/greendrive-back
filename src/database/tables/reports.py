@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, UUID, String, Integer, Date
+from sqlalchemy import Column, UUID, String, Integer, Date, JSON
 
 from database import Base
 from datetime import date
@@ -13,3 +13,4 @@ class Report(Base):
     vehicle_id = Column(String, nullable=False)
     score = Column(Integer, nullable=False)
     date = Column(Date, default=date.today, nullable=False)
+    analysis = Column(JSON, nullable=True)

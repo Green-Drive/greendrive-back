@@ -29,3 +29,4 @@ class ReportResponse(BaseModel):
     vehicle_id: str
     score: int
     timestamp: datetime
+    analysis: str

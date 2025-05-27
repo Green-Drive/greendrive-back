@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
+import json
 
 from database import Session
 from database.tables.reports import Report
@@ -44,6 +45,7 @@ async def analyze_trip(
         db_report = Report(
             vehicle_id=trip_data[0].vehicle_id,
             score=report.eco_score,
+            analysis=json.dumps(report.model_dump())
         )
         session.add(db_report)
         await session.commit()
@@ -66,5 +68,6 @@ async def get_reports(
         return [ReportResponse(
             vehicle_id=report.vehicle_id,
             score=report.score,
-            timestamp=report.date
+            timestamp=report.date,
+            analysis=report.analysis,
         ) for report in reports]
